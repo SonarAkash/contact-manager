@@ -6,23 +6,20 @@ const Contact = require('./models/Contact');
 
 const app = express();
 
-// Middleware
+
 app.use(express.json());
 app.use(cors());
 
-// Database Connection
+
 mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log('✅ MongoDB Connected Successfully'))
-  .catch(err => console.error('❌ MongoDB Connection Error:', err));
+  .then(() => console.log('MongoDB Connected Successfully'))
+  .catch(err => console.error(' MongoDB Connection Error:', err));
 
-// --- API ROUTES ---
 
-// 1. POST: Create a new contact
 app.post('/api/contacts', async (req, res) => {
   try {
     const { name, email, phone, message } = req.body;
     
-    // Create new contact
     const newContact = await Contact.create({ name, email, phone, message });
     
     res.status(201).json({ success: true, data: newContact });
@@ -35,7 +32,6 @@ app.post('/api/contacts', async (req, res) => {
   }
 });
 
-// 2. GET: Fetch all contacts (Sorted by newest first - Bonus)
 app.get('/api/contacts', async (req, res) => {
   try {
     const contacts = await Contact.find().sort({ createdAt: -1 });
@@ -45,7 +41,6 @@ app.get('/api/contacts', async (req, res) => {
   }
 });
 
-// 3. DELETE: Remove a contact (Bonus)
 app.delete('/api/contacts/:id', async (req, res) => {
   try {
     const contact = await Contact.findById(req.params.id);
@@ -60,4 +55,4 @@ app.delete('/api/contacts/:id', async (req, res) => {
 });
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+app.listen(PORT, () => console.log(` Server running on port ${PORT}`));
