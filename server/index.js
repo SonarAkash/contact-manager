@@ -41,6 +41,31 @@ app.get('/api/contacts', async (req, res) => {
   }
 });
 
+app.put('/api/contacts/:id', async (req, res) => {
+  try {
+    const { name, email, phone, message } = req.body;
+    
+    
+    const updatedContact = await Contact.findByIdAndUpdate(
+      req.params.id, 
+      { name, email, phone, message },
+      { new: true, runValidators: true } 
+    );
+
+    if (!updatedContact) {
+      return res.status(404).json({ success: false, error: 'Contact not found' });
+    }
+
+    res.status(200).json({ success: true, data: updatedContact });
+  } catch (error) {
+    if (error.name === 'ValidationError') {
+      const messages = Object.values(error.errors).map(val => val.message);
+      return res.status(400).json({ success: false, error: messages });
+    }
+    res.status(500).json({ success: false, error: 'Server Error' });
+  }
+});
+
 app.delete('/api/contacts/:id', async (req, res) => {
   try {
     const contact = await Contact.findById(req.params.id);
