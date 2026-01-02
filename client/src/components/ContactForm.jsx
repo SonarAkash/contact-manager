@@ -57,7 +57,7 @@ const ContactForm = ({ fetchContacts, editingContact, setEditingContact }) => {
         toast.success('Contact updated successfully!');
         setEditingContact(null); 
       } else {
-        await axios.post('https://contact-manager-k4ev.onrender.com//api/contacts', formData);
+        await axios.post('https://contact-manager-k4ev.onrender.com/api/contacts', formData);
         toast.success('Contact saved successfully!');
       }
       
