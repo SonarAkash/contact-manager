@@ -19,7 +19,7 @@ const ContactList = ({ contacts, fetchContacts, setEditingContact }) => {
     setIsDeleting(true);
     const toastId = toast.loading('Deleting contact...');
     try {
-      await axios.delete(`https://contact-manager-k4ev.onrender.com/contacts/${deleteId}`);
+      await axios.delete(`https://contact-manager-k4ev.onrender.com/api/contacts/${deleteId}`);
       toast.success('Contact deleted', { id: toastId });
       fetchContacts();
     } catch (err) {
