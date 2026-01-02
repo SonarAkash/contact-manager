@@ -16,6 +16,12 @@ mongoose.connect(process.env.MONGO_URI)
   .catch(err => console.error(' MongoDB Connection Error:', err));
 
 
+
+app.get('/', (req, res) => {
+  res.status(200).send('Backend is running successfully');
+});
+
+
 app.post('/api/contacts', async (req, res) => {
   try {
     const { name, email, phone, message } = req.body;
