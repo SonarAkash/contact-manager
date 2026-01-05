@@ -1,14 +1,23 @@
 import { useState } from 'react';
-import { Trash2, Mail, Phone, MessageSquare, AlertTriangle, Edit2 } from 'lucide-react';
+import { Trash2, Mail, Phone, MessageSquare, AlertTriangle, Edit2, Search, X } from 'lucide-react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
 const ContactList = ({ contacts, fetchContacts, setEditingContact }) => {
   const [deleteId, setDeleteId] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
-  
-
   const [expandedId, setExpandedId] = useState(null);
+  
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const filteredContacts = contacts.filter(contact => {
+    const term = searchTerm.toLowerCase();
+    return (
+      contact.name.toLowerCase().includes(term) ||
+      contact.email.toLowerCase().includes(term) ||
+      contact.phone.includes(term)
+    );
+  });
 
   const toggleExpand = (id) => {
     setExpandedId(expandedId === id ? null : id);
@@ -30,73 +39,101 @@ const ContactList = ({ contacts, fetchContacts, setEditingContact }) => {
     }
   };
 
-  if (contacts.length === 0) return (
-    <div className="text-center py-10 bg-white rounded-2xl shadow-sm border border-dashed border-gray-300">
-      <p className="text-gray-500">No contacts yet. Add one to get started!</p>
-    </div>
-  );
-
   return (
     <>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 h-fit overflow-y-auto max-h-[800px] pr-2 custom-scrollbar p-1">
-        {contacts.map((contact) => (
-          <div key={contact._id} className="group relative bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition-all border border-gray-100 duration-300">
-            
-            <div className="flex justify-between items-start mb-4">
-              <div className="flex-1 min-w-0 pr-2">
-                <h3 className="text-xl font-bold text-gray-800 capitalize truncate">{contact.name}</h3>
-                <span className="text-xs text-gray-400">{new Date(contact.createdAt).toLocaleDateString()}</span>
-              </div>
-              
-              <div className="flex gap-1 shrink-0">
-                
-                <button 
-                  onClick={() => setEditingContact(contact)}
-                  className="p-2 text-gray-300 hover:text-indigo-600 hover:bg-indigo-50 rounded-full transition-colors"
-                  title="Edit Contact"
-                >
-                  <Edit2 size={18} />
-                </button>
-                
-                <button 
-                  onClick={() => setDeleteId(contact._id)}
-                  className="p-2 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors"
-                  title="Delete Contact"
-                >
-                  <Trash2 size={18} />
-                </button>
-              </div>
-            </div>
-
-            <div className="space-y-3 text-sm text-gray-600">
-              <div className="flex items-center gap-3">
-                <Mail size={16} className="text-indigo-400 shrink-0" />
-                <span className="truncate">{contact.email}</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <Phone size={16} className="text-indigo-400 shrink-0" />
-                <span>{contact.phone}</span>
-              </div>
-              
-             
-              {contact.message && (
-                <div 
-                  className="flex items-start gap-3 mt-3 pt-3 border-t border-gray-50 cursor-pointer hover:bg-gray-50 rounded-md transition-colors p-1"
-                  onClick={() => toggleExpand(contact._id)}
-                  title="Click to expand/collapse"
-                >
-                  <MessageSquare size={16} className="text-indigo-400 mt-1 shrink-0" />
-                  <p className={`italic text-gray-500 break-words ${expandedId === contact._id ? '' : 'line-clamp-2'}`}>
-                    {contact.message}
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
-        ))}
+      <div className="mb-6 relative">
+        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <Search className="h-5 w-5 text-gray-400" />
+        </div>
+        <input
+          type="text"
+          className="block w-full pl-10 pr-10 py-3 border border-gray-200 rounded-xl leading-5 bg-gray-50 placeholder-gray-500 focus:outline-none focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out sm:text-sm"
+          placeholder="Search by name, email, or phone..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+        {searchTerm && (
+          <button 
+            onClick={() => setSearchTerm('')}
+            className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 cursor-pointer"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        )}
       </div>
 
-      
+      {contacts.length === 0 ? (
+        <div className="text-center py-10 bg-white rounded-2xl shadow-sm border border-dashed border-gray-300">
+          <p className="text-gray-500">No contacts yet. Add one to get started!</p>
+        </div>
+      ) : filteredContacts.length === 0 ? (
+        <div className="text-center py-10 bg-white rounded-2xl shadow-sm border border-dashed border-gray-300">
+          <p className="text-gray-500">No contacts found matching "{searchTerm}"</p>
+          <button 
+            onClick={() => setSearchTerm('')} 
+            className="mt-2 text-indigo-600 font-medium hover:underline"
+          >
+            Clear Search
+          </button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 h-fit overflow-y-auto max-h-[800px] pr-2 custom-scrollbar p-1">
+          {filteredContacts.map((contact) => (
+            <div key={contact._id} className="group relative bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition-all border border-gray-100 duration-300">
+              
+              <div className="flex justify-between items-start mb-4">
+                <div className="flex-1 min-w-0 pr-2">
+                  <h3 className="text-xl font-bold text-gray-800 capitalize truncate">{contact.name}</h3>
+                  <span className="text-xs text-gray-400">{new Date(contact.createdAt).toLocaleDateString()}</span>
+                </div>
+                
+                <div className="flex gap-1 shrink-0">
+                  <button 
+                    onClick={() => setEditingContact(contact)}
+                    className="p-2 text-gray-300 hover:text-indigo-600 hover:bg-indigo-50 rounded-full transition-colors"
+                    title="Edit Contact"
+                  >
+                    <Edit2 size={18} />
+                  </button>
+                  <button 
+                    onClick={() => setDeleteId(contact._id)}
+                    className="p-2 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors"
+                    title="Delete Contact"
+                  >
+                    <Trash2 size={18} />
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-3 text-sm text-gray-600">
+                <div className="flex items-center gap-3">
+                  <Mail size={16} className="text-indigo-400 shrink-0" />
+                  <span className="truncate">{contact.email}</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Phone size={16} className="text-indigo-400 shrink-0" />
+                  <span>{contact.phone}</span>
+                </div>
+                
+                {contact.message && (
+                  <div 
+                    className="flex items-start gap-3 mt-3 pt-3 border-t border-gray-50 cursor-pointer hover:bg-gray-50 rounded-md transition-colors p-1"
+                    onClick={() => toggleExpand(contact._id)}
+                    title="Click to expand/collapse"
+                  >
+                    <MessageSquare size={16} className="text-indigo-400 mt-1 shrink-0" />
+                    <p className={`italic text-gray-500 break-words ${expandedId === contact._id ? '' : 'line-clamp-2'}`}>
+                      {contact.message}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+     
       {deleteId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
           <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6">
